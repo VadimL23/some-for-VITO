@@ -1,11 +1,24 @@
-import graphql, { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLSchema } from 'graphql';
+import graphql, {
+	GraphQLObjectType,
+	GraphQLString,
+	GraphQLID,
+	GraphQLSchema,
+	GraphQLList,
+	GraphQLFloat
+} from 'graphql';
+import { IMovie } from '../interfaces';
+import { Movie } from '../models';
 
 const MovieType = new GraphQLObjectType({
 	name: 'movie',
 	fields: () => ({
-		id: { type: GraphQLID },
+		_id: { type: GraphQLID },
 		name: { type: GraphQLString },
-		genre: { type: GraphQLString }
+		genre: { type: new GraphQLList(GraphQLString) },
+		castsId: { type: new GraphQLList(GraphQLString) },
+		directorId: { type: new GraphQLList(GraphQLString) },
+		stars: { type: GraphQLFloat },
+		country: { type: GraphQLString }
 	})
 });
 
@@ -15,10 +28,16 @@ const Query = new GraphQLObjectType({
 		movie: {
 			type: MovieType,
 			args: {
-				id: { type: GraphQLID }
+				_id: { type: GraphQLID }
 			},
-			resolve(parent, args) {
-				const a = 1;
+			async resolve(parent, args) {
+				return await new Movie().getById(args._id);
+			}
+		},
+		movies: {
+			type: new GraphQLList(MovieType),
+			async resolve(parent, args) {
+				return await new Movie().getAll();
 			}
 		}
 	})
